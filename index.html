@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Wiz Guide - Car Recommendation Expert</title>
+    <meta name="description" content="Find your perfect car with our expert recommendation system">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: 217 91% 60%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 214 32% 91%;
+            --secondary-foreground: 217 11% 15%;
+            --muted: 214 32% 91%;
+            --muted-foreground: 217 11% 45%;
+            --accent: 217 91% 60%;
+            --accent-foreground: 0 0% 98%;
+            --destructive: 0 84% 60%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 214 32% 91%;
+            --input: 214 32% 91%;
+            --ring: 217 91% 60%;
+            --background: 0 0% 100%;
+            --foreground: 222 11% 15%;
+            --card: 0 0% 100%;
+            --card-foreground: 222 11% 15%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222 11% 15%;
+            --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(217 91% 70%));
+            --shadow-elegant: 0 10px 30px -10px hsl(217 91% 60% / 0.3);
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: hsl(var(--foreground));
+            background: linear-gradient(135deg, hsl(var(--background)), hsl(var(--muted)));
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            color: hsl(var(--primary));
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-elegant);
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-card {
+            padding: 1.5rem;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .progress-count {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .progress-bar {
+            height: 0.75rem;
+            background: hsl(var(--muted));
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        .section-card {
+            transition: var(--transition-smooth);
+        }
+
+        .section-card:hover {
+            box-shadow: 0 20px 40px -10px hsl(var(--primary) / 0.2);
+        }
+
+        .section-header {
+            padding: 1.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid hsl(var(--border));
+            transition: var(--transition-smooth);
+        }
+
+        .section-header:hover {
+            background: hsl(var(--muted) / 0.5);
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .section-number {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .number-badge {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+            font-weight: bold;
+        }
+
+        .number-badge.completed {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .number-badge.incomplete {
+            background: hsl(var(--muted));
+            color: hsl(var(--muted-foreground));
+        }
+
+        .chevron {
+            width: 1rem;
+            height: 1rem;
+            transition: transform 0.2s;
+        }
+
+        .chevron.expanded {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .section-content.expanded {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .checkbox-item:hover {
+            background: hsl(var(--muted) / 0.5);
+        }
+
+        .checkbox-item.selected {
+            background: hsl(var(--primary) / 0.1);
+            border-color: hsl(var(--primary));
+        }
+
+        .checkbox {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: hsl(var(--primary-foreground));
+            font-size: 1.125rem;
+            padding: 1.5rem 2rem;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-elegant);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .btn-secondary:hover {
+            background: hsl(var(--secondary) / 0.8);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: hsl(var(--card));
+            border-radius: 0.5rem;
+            max-width: 40rem;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid hsl(var(--border));
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .recommendation-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .car-name {
+            font-size: 2rem;
+            font-weight: bold;
+            color: hsl(var(--primary));
+            margin-bottom: 0.5rem;
+        }
+
+        .car-price {
+            font-size: 1.25rem;
+            color: hsl(var(--accent));
+            font-weight: 600;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .spec-section h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .spec-list {
+            list-style: none;
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .spec-list li {
+            margin-bottom: 0.25rem;
+        }
+
+        .explanation {
+            background: hsl(var(--muted) / 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+
+        .explanation h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .explanation p {
+            font-size: 0.875rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .close-btn:hover {
+            color: hsl(var(--foreground));
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-7 7-7-7"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"></path>
+                </svg>
+                <h1 class="title">Auto Wiz Guide</h1>
+            </div>
+            <p class="subtitle">Find your perfect car with our expert recommendation system</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="card progress-card">
+            <div class="progress-header">
+                <span class="progress-text">Progress</span>
+                <span class="progress-count" id="progress-count">0/4 sections</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Questionnaire Sections -->
+        <div id="sections-container">
+            <!-- Basic Requirements -->
+            <div class="card section-card">
+                <div class="section-header" onclick="toggleSection(0)">
+                    <div class="section-title">
+                        <div class="section-number">
+                            <div class="number-badge incomplete" id="badge-0">1</div>
+                            Basic Requirements
+                        </div>
+                        <svg class="chevron" id="chevron-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="section-content expanded" id="content-0">
+                    <div class="form-group">
+                        <label class="form-label">Budget Range</label>
+                        <select class="form-control" id="budget">
+                            <option value="">Select your budget</option>
+                            <option value="Under $20,000">Under $20,000</option>
+                            <option value="$20,000 - $30,000">$20,000 - $30,000</option>
+                            <option value="$30,000 - $50,000">$30,000 - $50,000</option>
+                            <option value="$50,000 - $75,000">$50,000 - $75,000</option>
+                            <option value="Over $75,000">Over $75,000</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Vehicle Type</label>
+                        <select class="form-control" id="vehicleType">
+                            <option value="">Select vehicle type</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Truck">Truck</option>
+                            <option value="Coupe">Coupe</option>
+                            <option value="Convertible">Convertible</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fuel Type</label>
+                        <select class="form-control" id="fuelType">
+                            <option value="">Select fuel type</option>
+                            <option value="Gasoline">Gasoline</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hybrid">Hybrid</option>
+                            <option value="Diesel">Diesel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Transmission</label>
+                        <select class="form-control" id="transmission">
+                            <option value="">Select transmission</option>
+                            <option value="Automatic">Automatic</option>
+                            <option value="Manual">Manual</option>
+                            <option value="CVT">CVT</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Number of Seats</label>
+                        <select class="form-control" id="seats">
+                            <option value="">Select number of seats</option>
+                            <option value="2">2 seats</option>
+                            <option value="4">4 seats</option>
+                            <option value="5">5 seats</option>
+                            <option value="7">7 seats</option>
+                            <option value="8+">8+ seats</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Preferred Brand (Optional)</label>
+                        <select class="form-control" id="brand">
+                            <option value="">Any brand</option>
+                            <option value="Toyota">Toyota</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Ford">Ford</option>
+                            <option value="Chevrolet">Chevrolet</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Mercedes-Benz">Mercedes-Benz</option>
+                            <option value="Audi">Audi</option>
+                            <option value="Tesla">Tesla</option>
+                            <option value="Nissan">Nissan</option>
+                            <option value="Hyundai">Hyundai</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" onclick="completeSection(0)">Complete Basic Requirements</button>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="card section-card">
+                <div class="section-header" onclick="toggleSection(1)">
+                    <div class="section-title">
+                        <div class="section-number">
+                            <div class="number-badge incomplete" id="badge-1">2</div>
+                            Features
+                        </div>
+                        <svg class="chevron" id="chevron-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="section-content" id="content-1">
+                    <div class="form-group">
+                        <label class="form-label">Desired Features (Select all that apply)</label>
+                        <div class="checkbox-group" id="features-group">
+                            <div class="checkbox-item" onclick="toggleFeature('Leather Seats')">
+                                <input type="checkbox" class="checkbox" id="feature-leather">
+                                <span>Leather Seats</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Sunroof')">
+                                <input type="checkbox" class="checkbox" id="feature-sunroof">
+                                <span>Sunroof</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Navigation System')">
+                                <input type="checkbox" class="checkbox" id="feature-navigation">
+                                <span>Navigation System</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Bluetooth')">
+                                <input type="checkbox" class="checkbox" id="feature-bluetooth">
+                                <span>Bluetooth</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Backup Camera')">
+                                <input type="checkbox" class="checkbox" id="feature-camera">
+                                <span>Backup Camera</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Heated Seats')">
+                                <input type="checkbox" class="checkbox" id="feature-heated">
+                                <span>Heated Seats</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Premium Audio')">
+                                <input type="checkbox" class="checkbox" id="feature-audio">
+                                <span>Premium Audio</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleFeature('Keyless Entry')">
+                                <input type="checkbox" class="checkbox" id="feature-keyless">
+                                <span>Keyless Entry</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="completeSection(1)">Complete Features</button>
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="card section-card">
+                <div class="section-header" onclick="toggleSection(2)">
+                    <div class="section-title">
+                        <div class="section-number">
+                            <div class="number-badge incomplete" id="badge-2">3</div>
+                            Performance
+                        </div>
+                        <svg class="chevron" id="chevron-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="section-content" id="content-2">
+                    <div class="form-group">
+                        <label class="form-label">Horsepower Preference</label>
+                        <select class="form-control" id="horsepower">
+                            <option value="">No preference</option>
+                            <option value="Under 200 HP">Under 200 HP</option>
+                            <option value="200-300 HP">200-300 HP</option>
+                            <option value="300-400 HP">300-400 HP</option>
+                            <option value="Over 400 HP">Over 400 HP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fuel Economy Priority</label>
+                        <select class="form-control" id="fuelEconomy">
+                            <option value="">No preference</option>
+                            <option value="Excellent (30+ MPG)">Excellent (30+ MPG)</option>
+                            <option value="Good (25-30 MPG)">Good (25-30 MPG)</option>
+                            <option value="Average (20-25 MPG)">Average (20-25 MPG)</option>
+                            <option value="Performance over economy">Performance over economy</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Acceleration Preference</label>
+                        <select class="form-control" id="acceleration">
+                            <option value="">No preference</option>
+                            <option value="Very Fast (Under 5 seconds)">Very Fast (Under 5 seconds)</option>
+                            <option value="Fast (5-7 seconds)">Fast (5-7 seconds)</option>
+                            <option value="Moderate (7-9 seconds)">Moderate (7-9 seconds)</option>
+                            <option value="Comfort over speed">Comfort over speed</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" onclick="completeSection(2)">Complete Performance</button>
+                </div>
+            </div>
+
+            <!-- Safety -->
+            <div class="card section-card">
+                <div class="section-header" onclick="toggleSection(3)">
+                    <div class="section-title">
+                        <div class="section-number">
+                            <div class="number-badge incomplete" id="badge-3">4</div>
+                            Safety
+                        </div>
+                        <svg class="chevron" id="chevron-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="section-content" id="content-3">
+                    <div class="form-group">
+                        <label class="form-label">Safety Rating Importance</label>
+                        <select class="form-control" id="safetyRating">
+                            <option value="">No preference</option>
+                            <option value="5 Star">5 Star Required</option>
+                            <option value="4+ Star">4+ Star Minimum</option>
+                            <option value="3+ Star">3+ Star Acceptable</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Important Safety Features (Select all that apply)</label>
+                        <div class="checkbox-group" id="safety-features-group">
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Automatic Emergency Braking')">
+                                <input type="checkbox" class="checkbox" id="safety-aeb">
+                                <span>Automatic Emergency Braking</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Blind Spot Monitoring')">
+                                <input type="checkbox" class="checkbox" id="safety-blind">
+                                <span>Blind Spot Monitoring</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Lane Keep Assist')">
+                                <input type="checkbox" class="checkbox" id="safety-lane">
+                                <span>Lane Keep Assist</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Adaptive Cruise Control')">
+                                <input type="checkbox" class="checkbox" id="safety-cruise">
+                                <span>Adaptive Cruise Control</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Forward Collision Warning')">
+                                <input type="checkbox" class="checkbox" id="safety-collision">
+                                <span>Forward Collision Warning</span>
+                            </div>
+                            <div class="checkbox-item" onclick="toggleSafetyFeature('Parking Sensors')">
+                                <input type="checkbox" class="checkbox" id="safety-parking">
+                                <span>Parking Sensors</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="completeSection(3)">Complete Safety</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Recommendation Button -->
+        <div class="text-center">
+            <button class="btn btn-primary" id="get-recommendation-btn" onclick="getRecommendation()" disabled>
+                Get My Car Recommendation
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Modal -->
+    <div class="modal" id="results-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title">Your Perfect Match!</h2>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Recommendation content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Car database
+        const carDatabase = [
+            {
+                id: 1,
+                year: 2024,
+                make: "Toyota",
+                model: "Camry",
+                type: "Sedan",
+                price: "$25,900 - $36,400",
+                budgetRange: "$20,000 - $30,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "32 combined",
+                horsepower: "203-301 HP",
+                safetyRating: "5 Star",
+                features: ["Bluetooth", "Backup Camera", "Keyless Entry", "Premium Audio", "Navigation System"],
+                safetyFeatures: ["Automatic Emergency Braking", "Lane Keep Assist", "Adaptive Cruise Control"],
+                acceleration: "7.5 seconds",
+                score: 0
+            },
+            {
+                id: 2,
+                year: 2024,
+                make: "Honda",
+                model: "CR-V",
+                type: "SUV",
+                price: "$28,200 - $38,200",
+                budgetRange: "$20,000 - $30,000",
+                fuelType: "Gasoline",
+                transmission: "CVT",
+                seats: "5",
+                mpg: "31 combined",
+                horsepower: "190 HP",
+                safetyRating: "5 Star",
+                features: ["Bluetooth", "Backup Camera", "Heated Seats", "Navigation System", "Keyless Entry"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist"],
+                acceleration: "8.2 seconds",
+                score: 0
+            },
+            {
+                id: 3,
+                year: 2024,
+                make: "Tesla",
+                model: "Model 3",
+                type: "Sedan",
+                price: "$40,240 - $54,240",
+                budgetRange: "$30,000 - $50,000",
+                fuelType: "Electric",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "120 MPGe",
+                horsepower: "283-450 HP",
+                safetyRating: "5 Star",
+                features: ["Navigation System", "Premium Audio", "Keyless Entry", "Heated Seats", "Sunroof"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist", "Adaptive Cruise Control"],
+                acceleration: "5.8 seconds",
+                score: 0
+            },
+            {
+                id: 4,
+                year: 2024,
+                make: "Ford",
+                model: "F-150",
+                type: "Truck",
+                price: "$33,695 - $76,000",
+                budgetRange: "$30,000 - $50,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "22 combined",
+                horsepower: "290-450 HP",
+                safetyRating: "4 Star",
+                features: ["Bluetooth", "Backup Camera", "Navigation System", "Heated Seats", "Premium Audio"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Parking Sensors"],
+                acceleration: "6.5 seconds",
+                score: 0
+            },
+            {
+                id: 5,
+                year: 2024,
+                make: "BMW",
+                model: "3 Series",
+                type: "Sedan",
+                price: "$36,350 - $56,000",
+                budgetRange: "$30,000 - $50,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "28 combined",
+                horsepower: "255-382 HP",
+                safetyRating: "5 Star",
+                features: ["Leather Seats", "Sunroof", "Navigation System", "Premium Audio", "Keyless Entry"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist", "Adaptive Cruise Control"],
+                acceleration: "5.6 seconds",
+                score: 0
+            },
+            {
+                id: 6,
+                year: 2024,
+                make: "Hyundai",
+                model: "Elantra",
+                type: "Sedan",
+                price: "$21,550 - $28,000",
+                budgetRange: "Under $20,000",
+                fuelType: "Gasoline",
+                transmission: "CVT",
+                seats: "5",
+                mpg: "35 combined",
+                horsepower: "147-201 HP",
+                safetyRating: "5 Star",
+                features: ["Bluetooth", "Backup Camera", "Heated Seats", "Keyless Entry"],
+                safetyFeatures: ["Automatic Emergency Braking", "Lane Keep Assist", "Forward Collision Warning"],
+                acceleration: "8.9 seconds",
+                score: 0
+            },
+            {
+                id: 7,
+                year: 2024,
+                make: "Chevrolet",
+                model: "Tahoe",
+                type: "SUV",
+                price: "$52,400 - $76,000",
+                budgetRange: "$50,000 - $75,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "8+",
+                mpg: "18 combined",
+                horsepower: "355-420 HP",
+                safetyRating: "5 Star",
+                features: ["Leather Seats", "Navigation System", "Premium Audio", "Heated Seats", "Backup Camera"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist"],
+                acceleration: "7.1 seconds",
+                score: 0
+            },
+            {
+                id: 8,
+                year: 2024,
+                make: "Audi",
+                model: "A4",
+                type: "Sedan",
+                price: "$40,500 - $55,000",
+                budgetRange: "$30,000 - $50,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "27 combined",
+                horsepower: "261-349 HP",
+                safetyRating: "5 Star",
+                features: ["Leather Seats", "Sunroof", "Navigation System", "Premium Audio", "Heated Seats"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist", "Adaptive Cruise Control"],
+                acceleration: "5.7 seconds",
+                score: 0
+            },
+            {
+                id: 9,
+                year: 2024,
+                make: "Nissan",
+                model: "Altima",
+                type: "Sedan",
+                price: "$25,100 - $36,000",
+                budgetRange: "$20,000 - $30,000",
+                fuelType: "Gasoline",
+                transmission: "CVT",
+                seats: "5",
+                mpg: "32 combined",
+                horsepower: "188-248 HP",
+                safetyRating: "4 Star",
+                features: ["Bluetooth", "Backup Camera", "Keyless Entry", "Navigation System"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist"],
+                acceleration: "7.8 seconds",
+                score: 0
+            },
+            {
+                id: 10,
+                year: 2024,
+                make: "Mercedes-Benz",
+                model: "C-Class",
+                type: "Sedan",
+                price: "$43,550 - $65,000",
+                budgetRange: "$30,000 - $50,000",
+                fuelType: "Gasoline",
+                transmission: "Automatic",
+                seats: "5",
+                mpg: "26 combined",
+                horsepower: "255-375 HP",
+                safetyRating: "5 Star",
+                features: ["Leather Seats", "Sunroof", "Navigation System", "Premium Audio", "Heated Seats"],
+                safetyFeatures: ["Automatic Emergency Braking", "Blind Spot Monitoring", "Lane Keep Assist", "Adaptive Cruise Control"],
+                acceleration: "5.9 seconds",
+                score: 0
+            }
+        ];
+
+        // State
+        let currentSection = 0;
+        let completedSections = [false, false, false, false];
+        let selectedFeatures = [];
+        let selectedSafetyFeatures = [];
+
+        // UI Functions
+        function toggleSection(index) {
+            // Close all sections
+            for (let i = 0; i < 4; i++) {
+                const content = document.getElementById(`content-${i}`);
+                const chevron = document.getElementById(`chevron-${i}`);
+                
+                if (i === index) {
+                    content.classList.toggle('expanded');
+                    chevron.classList.toggle('expanded');
+                } else {
+                    content.classList.remove('expanded');
+                    chevron.classList.remove('expanded');
+                }
+            }
+            currentSection = index;
+        }
+
+        function completeSection(index) {
+            completedSections[index] = true;
+            const badge = document.getElementById(`badge-${index}`);
+            badge.classList.remove('incomplete');
+            badge.classList.add('completed');
+            
+            // Move to next section
+            if (index < 3) {
+                toggleSection(index + 1);
+            }
+            
+            updateProgress();
+            updateRecommendationButton();
+        }
+
+        function updateProgress() {
+            const completed = completedSections.filter(c => c).length;
+            const progress = (completed / 4) * 100;
+            
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-count').textContent = `${completed}/4 sections`;
+        }
+
+        function updateRecommendationButton() {
+            const budget = document.getElementById('budget').value;
+            const vehicleType = document.getElementById('vehicleType').value;
+            const fuelType = document.getElementById('fuelType').value;
+            
+            const isValid = budget && vehicleType && fuelType;
+            document.getElementById('get-recommendation-btn').disabled = !isValid;
+        }
+
+        function toggleFeature(feature) {
+            const index = selectedFeatures.indexOf(feature);
+            const checkbox = document.querySelector(`#feature-${feature.toLowerCase().replace(/\s+/g, '')}`);
+            const item = checkbox.parentElement;
+            
+            if (index > -1) {
+                selectedFeatures.splice(index, 1);
+                checkbox.checked = false;
+                item.classList.remove('selected');
+            } else {
+                selectedFeatures.push(feature);
+                checkbox.checked = true;
+                item.classList.add('selected');
+            }
+        }
+
+        function toggleSafetyFeature(feature) {
+            const index = selectedSafetyFeatures.indexOf(feature);
+            const checkbox = document.querySelector(`#safety-${feature.toLowerCase().replace(/\s+/g, '').replace(/\W/g, '')}`);
+            const item = checkbox.parentElement;
+            
+            if (index > -1) {
+                selectedSafetyFeatures.splice(index, 1);
+                checkbox.checked = false;
+                item.classList.remove('selected');
+            } else {
+                selectedSafetyFeatures.push(feature);
+                checkbox.checked = true;
+                item.classList.add('selected');
+            }
+        }
+
+        // Recommendation Engine
+        function getRecommendation() {
+            const preferences = {
+                budget: document.getElementById('budget').value,
+                vehicleType: document.getElementById('vehicleType').value,
+                fuelType: document.getElementById('fuelType').value,
+                transmission: document.getElementById('transmission').value,
+                seats: document.getElementById('seats').value,
+                brand: document.getElementById('brand').value,
+                features: selectedFeatures,
+                performance: {
+                    horsepower: document.getElementById('horsepower').value,
+                    fuelEconomy: document.getElementById('fuelEconomy').value,
+                    acceleration: document.getElementById('acceleration').value
+                },
+                safety: {
+                    rating: document.getElementById('safetyRating').value,
+                    features: selectedSafetyFeatures
+                }
+            };
+
+            let recommendation = findRecommendation(preferences);
+            if (!recommendation) {
+                recommendation = getFallbackRecommendation(preferences);
+            }
+
+            showRecommendation(recommendation, preferences);
+        }
+
+        function findRecommendation(preferences) {
+            // Reset scores
+            carDatabase.forEach(car => car.score = 0);
+
+            // Filter by mandatory criteria
+            let candidates = carDatabase.filter(car => {
+                if (preferences.vehicleType && car.type !== preferences.vehicleType) return false;
+                if (preferences.fuelType && car.fuelType !== preferences.fuelType) return false;
+                if (preferences.brand && car.make !== preferences.brand) return false;
+                return true;
+            });
+
+            if (candidates.length === 0) return null;
+
+            // Score remaining candidates
+            candidates.forEach(car => {
+                // Budget match
+                if (preferences.budget && car.budgetRange === preferences.budget) {
+                    car.score += 10;
+                }
+
+                // Feature matches
+                preferences.features.forEach(feature => {
+                    if (car.features.includes(feature)) {
+                        car.score += 2;
+                    }
+                });
+
+                // Safety feature matches
+                preferences.safety.features.forEach(feature => {
+                    if (car.safetyFeatures.includes(feature)) {
+                        car.score += 3;
+                    }
+                });
+
+                // Safety rating
+                if (preferences.safety.rating) {
+                    const requiredStars = parseInt(preferences.safety.rating);
+                    const carStars = parseInt(car.safetyRating);
+                    if (carStars >= requiredStars) {
+                        car.score += 5;
+                    }
+                }
+
+                // Transmission match
+                if (preferences.transmission && car.transmission === preferences.transmission) {
+                    car.score += 3;
+                }
+
+                // Seats match
+                if (preferences.seats && car.seats === preferences.seats) {
+                    car.score += 3;
+                }
+            });
+
+            // Return highest scoring car
+            candidates.sort((a, b) => b.score - a.score);
+            return candidates[0];
+        }
+
+        function getFallbackRecommendation(preferences) {
+            // More lenient matching for fallback
+            let candidates = carDatabase.filter(car => {
+                if (preferences.vehicleType && car.type !== preferences.vehicleType) return false;
+                return true;
+            });
+
+            if (candidates.length === 0) {
+                // Return any car if no type match
+                candidates = carDatabase;
+            }
+
+            // Simple scoring for fallback
+            candidates.forEach(car => {
+                car.score = 0;
+                if (preferences.budget && car.budgetRange === preferences.budget) car.score += 5;
+                if (preferences.fuelType && car.fuelType === preferences.fuelType) car.score += 3;
+            });
+
+            candidates.sort((a, b) => b.score - a.score);
+            return candidates[0];
+        }
+
+        function showRecommendation(car, preferences) {
+            const modalBody = document.getElementById('modal-body');
+            
+            modalBody.innerHTML = `
+                <div class="recommendation-title">
+                    <h3 class="car-name">${car.year} ${car.make} ${car.model}</h3>
+                    <p class="car-price">${car.price}</p>
+                </div>
+                
+                <div class="specs-grid">
+                    <div class="spec-section">
+                        <h4>Specifications</h4>
+                        <ul class="spec-list">
+                            <li>Type: ${car.type}</li>
+                            <li>Fuel: ${car.fuelType}</li>
+                            <li>Transmission: ${car.transmission}</li>
+                            <li>Seats: ${car.seats}</li>
+                            <li>MPG: ${car.mpg}</li>
+                            <li>Horsepower: ${car.horsepower}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="spec-section">
+                        <h4>Safety & Features</h4>
+                        <ul class="spec-list">
+                            <li>Safety Rating: ${car.safetyRating}</li>
+                            ${car.features.slice(0, 4).map(feature => `<li>• ${feature}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="explanation">
+                    <h4>Why this car?</h4>
+                    <p>Based on your preferences for a ${preferences.vehicleType} with ${preferences.fuelType} fuel type 
+                    within your ${preferences.budget} budget, this vehicle offers the best combination of features, 
+                    performance, and value that matches your requirements.</p>
+                </div>
+            `;
+            
+            document.getElementById('results-modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('results-modal').classList.remove('show');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change listeners to basic form fields
+            ['budget', 'vehicleType', 'fuelType'].forEach(id => {
+                document.getElementById(id).addEventListener('change', updateRecommendationButton);
+            });
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('results-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
